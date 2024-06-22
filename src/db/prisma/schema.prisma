@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+model TravelBlog {
+  id Int @id @default(autoincrement())
+  title String
+  article String @db.MediumText
+  postDate DateTime
+  locationId Int?
+  location Location? @relation(fields: [locationId], references: [id])
+  regionId Int?
+  region Region? @relation(fields: [regionId], references: [id])
+  environmentId Int?
+  environment Environment? @relation(fields: [environmentId], references: [id])
+  images Image[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([title])
+  @@index([postDate])
+}
+
+model YogaBlog {
+  id Int @id @default(autoincrement())
+  title String
+  article String @db.MediumText
+  modalityId Int?
+  modality Modality? @relation(fields: [modalityId], references: [id])
+  images Image[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([title])
+}
+
+model Schedule {
+  id Int @id @default(autoincrement())
+  classTime DateTime?
+  length String?
+  signUpLink String?
+  modalityId Int?
+  modality Modality? @relation(fields: [modalityId], references: [id])
+  locationId Int?
+  location Location? @relation(fields: [locationId], references: [id])
+  classDescriptionId Int?
+  classDescription ClassDescription? @relation(fields: [classDescriptionId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClassDescription {
+  id Int @id @default(autoincrement())
+  name String
+  description String @db.Text
+  schedules Schedule[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Region {
+  id Int @id @default(autoincrement())
+  name String
+  travelBlog TravelBlog[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Environment {
+  id Int @id @default(autoincrement())
+  name String
+  travelBlog TravelBlog[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Modality {
+  id Int @id @default(autoincrement())
+  name String
+  description String @db.Text
+  imageId Int
+  image Image @relation(fields: [imageId], references: [id])
+  schedules Schedule[]
+  yogaBlogs YogaBlog[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Location {
+  id Int @id @default(autoincrement())
+  name String
+  address String?
+  city String?
+  state String?
+  zip String?
+  mapsLink String?
+  type LocationType
+  imageId Int
+  image Image @relation(fields: [imageId], references: [id])
+  schedules Schedule[]
+  travelBlogs TravelBlog[]
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LocationType {
+  YOGA
+  TRAVEL
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  emailVerified DateTime?
+  name String?
+  image String?
+  travelBlogs TravelBlog[]
+  yogaBlogs YogaBlog[]
+  regions Region[]
+  environments Environment[]
+  locations Location[]
+  modalities Modality[]
+  role Role @default(BASE)
+  profile Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id Int @id @default(autoincrement())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id])
+  name String?
+  imageId Int?
+  image Image? @relation(fields: [imageId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  BASE
+}
+
+
+
+model Image {
+  id Int @id @default(autoincrement())
+  key String
+  url String @unique
+  travelBlogs TravelBlog[]
+  profiles Profile[]
+  yogaBlogs YogaBlog[]
+  modalities Modality[]
+  locations Location[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
